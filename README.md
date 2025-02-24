@@ -11,4 +11,4 @@ This project is a trial game developed to showcase skills and proficiency in Uni
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/trial-game-project.git
+   git clone git@github.com:vitorpio/Isometric2DGame.git
