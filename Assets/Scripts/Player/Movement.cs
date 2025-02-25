@@ -7,16 +7,31 @@ public class Movement : MonoBehaviour
     [SerializeField] float movementSpeed = 5f;
     [SerializeField] float maxSpeed = 8f;
 
+    Animator animator;
     Rigidbody rb;
+
+    private readonly string moveUpOrDownAnimation = "IsMovingUpOrDown";
+    private readonly string moveLeftOrRightAnimation = "IsMovingLeftOrRight";
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
     }
 
     void Update()
     {
         ProcessMovement();
+    }
+
+    void OnEnable()
+    {
+        move.Enable();
+    }
+
+    void OnDisable()
+    {
+        move.Disable();
     }
 
     void ProcessMovement()
@@ -41,15 +56,24 @@ public class Movement : MonoBehaviour
         {
             rb.linearVelocity = Vector3.zero;
         }
+        ProcessMovementAnimation(movement);
     }
 
-    void OnEnable()
+    void ProcessMovementAnimation(Vector2 movement)
     {
-        move.Enable();
+        if (movement.y != 0)
+        {
+            animator.SetBool(moveUpOrDownAnimation, true);
+        }
+        else if (movement.x != 0)
+        {
+            animator.SetBool(moveLeftOrRightAnimation, true);
+        }
+        else
+        {
+            animator.SetBool(moveUpOrDownAnimation, false);
+            animator.SetBool(moveLeftOrRightAnimation, false);
+        }
     }
 
-    void OnDisable()
-    {
-        move.Disable();
-    }
 }
