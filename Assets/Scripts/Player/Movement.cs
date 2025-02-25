@@ -23,11 +23,17 @@ public class Movement : MonoBehaviour
     {
         Vector2 movement = move.ReadValue<Vector2>();
 
+        // Disable diagonal movement
+        if (Mathf.Abs(movement.x) > 0 && Mathf.Abs(movement.y) > 0)
+        {
+            movement = Vector2.zero;
+        }
+
         if (movement != Vector2.zero)
         {
             if (rb.linearVelocity.magnitude < maxSpeed)
             {
-                Vector3 force = new Vector3(movement.y, 0, -movement.x) * movementSpeed;
+                Vector3 force = new Vector3(movement.x, 0, movement.y) * movementSpeed;
                 rb.AddForce(force, ForceMode.Acceleration);
             }
         }
