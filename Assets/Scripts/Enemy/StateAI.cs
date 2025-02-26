@@ -11,6 +11,7 @@ public class StateAI : MonoBehaviour
     Coroutine checkPatrolCoroutine;
     readonly float patrollingSpeed = 3f;
     readonly float minDistanceToPatrolPoint = 0.1f;
+    readonly float timeToCheckPatrol = 1f;
 
     // Chase params
     readonly float chassingSpeed = 3.5f;
@@ -99,10 +100,10 @@ public class StateAI : MonoBehaviour
         checkPatrolCoroutine = StartCoroutine(nameof(CheckPatrolRoutine));
     }
 
-    // Coroutine to check if will patrol chance to siwtch to patrol is 50/50
+    // Coroutine to check every second if will patrol the chance to siwtch to patrol is 50/50
     IEnumerator CheckPatrolRoutine()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(timeToCheckPatrol);
         if (Random.value > 0.5f && CurrentState == State.Idle)
         {
             CurrentState = State.Patrol;
