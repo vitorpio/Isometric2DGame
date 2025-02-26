@@ -6,12 +6,16 @@ public class StateAI : MonoBehaviour
     public State CurrentState = State.Idle;
 
     // Patrolling params
-    [SerializeField] GameObject[] patrolPoints;
+    [SerializeField] Vector3[] patrolPoints;
     int nextPatrolPointIndex = 0;
     Coroutine checkPatrolCoroutine;
     readonly float patrollingSpeed = 3f;
     readonly float minDistanceToPatrolPoint = 0.1f;
     readonly float timeToCheckPatrol = 1f;
+    readonly int minPatrolPoints = 2;
+    readonly int maxPatrolPoints = 5;
+    readonly float minPatrolPointDistance = -10f;
+    readonly float maxPatrolPointDistance = 10f;
 
     // Chase params
     readonly float chassingSpeed = 3.5f;
@@ -19,6 +23,7 @@ public class StateAI : MonoBehaviour
 
     // Attack params
     GameObject playerBeingAttacked;
+
 
     private readonly string playerTag = "Player";
 
@@ -63,6 +68,11 @@ public class StateAI : MonoBehaviour
             playerBeingAttacked = null;
             CurrentState = State.Chase;
         }
+    }
+
+    void Awake()
+    {
+        GenerateRandomPatrolRoute();
     }
 
     void Update()
@@ -114,12 +124,12 @@ public class StateAI : MonoBehaviour
     void MoveToNextPatrolPoint()
     {
         // Check if reached patrol point move to the next one
-        if (Vector3.Distance(transform.parent.position, patrolPoints[nextPatrolPointIndex].transform.position) < minDistanceToPatrolPoint)
+        if (Vector3.Distance(transform.parent.position, patrolPoints[nextPatrolPointIndex]) < minDistanceToPatrolPoint)
         {
             nextPatrolPointIndex = (nextPatrolPointIndex + 1) % patrolPoints.Length;
         }
 
-        transform.parent.position = Vector3.MoveTowards(transform.parent.position, patrolPoints[nextPatrolPointIndex].transform.position, patrollingSpeed * Time.deltaTime);
+        transform.parent.position = Vector3.MoveTowards(transform.parent.position, patrolPoints[nextPatrolPointIndex], patrollingSpeed * Time.deltaTime);
     }
 
     void ChasePlayer()
@@ -134,6 +144,16 @@ public class StateAI : MonoBehaviour
     void AttackPlayer()
     {
         Debug.Log("Attacking player");
+    }
+
+    void GenerateRandomPatrolRoute()
+    {
+        int patrolPointsCount = Random.Range(minPatrolPoints, maxPatrolPoints);
+        patrolPoints = new Vector3[patrolPointsCount];
+        for (int i = 0; i < patrolPointsCount; i++)
+        {
+            patrolPoints[i] = new Vector3(transform.parent.position.x + Random.Range(minPatrolPointDistance, maxPatrolPointDistance), transform.parent.position.y, Random.Range(minPatrolPointDistance, maxPatrolPointDistance));
+        }
     }
 
 }
