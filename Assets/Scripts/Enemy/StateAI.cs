@@ -3,24 +3,59 @@ using UnityEngine;
 
 public class StateAI : MonoBehaviour
 {
-    public State CurrentState = State.Idle;
+    Animator animator;
+
+    private State _currentState;
+    private State CurrentState
+    {
+        get => _currentState;
+        set
+        {
+            if (_currentState != value)
+            {
+                _currentState = value;
+                animator.SetTrigger(value.ToString());
+                if (checkPatrolCoroutine != null)
+                {
+                    StopCoroutine(checkPatrolCoroutine);
+                    checkPatrolCoroutine = null;
+                }
+            }
+        }
+    }
 
     // Patrolling params
-    [SerializeField] GameObject[] patrolPoints;
-    int nextPatrolPointIndex = 0;
+    Vector3[] patrolPoints;
     Coroutine checkPatrolCoroutine;
+    int nextPatrolPointIndex = 0;
     readonly float patrollingSpeed = 3f;
     readonly float minDistanceToPatrolPoint = 0.1f;
     readonly float timeToCheckPatrol = 1f;
+    readonly int minPatrolPoints = 2;
+    readonly int maxPatrolPoints = 5;
+    readonly float minPatrolPointDistance = -10f;
+    readonly float maxPatrolPointDistance = 10f;
 
     // Chase params
-    readonly float chassingSpeed = 3.5f;
     Vector3? chasedPlayerPosition;
+    readonly float chassingSpeed = 3.5f;
 
     // Attack params
     GameObject playerBeingAttacked;
 
-    private readonly string playerTag = "Player";
+    // Other Variables
+    readonly string playerTag = "Player";
+
+    void Awake()
+    {
+        animator = GetComponentInParent<Animator>();
+        GenerateRandomPatrolRoute();
+    }
+
+    void Update()
+    {
+        ProcessState();
+    }
 
     void OnTriggerEnter(Collider other)
     {
@@ -51,8 +86,8 @@ public class StateAI : MonoBehaviour
     {
         if (other.gameObject.CompareTag(playerTag))
         {
-            playerBeingAttacked = other.gameObject;
             CurrentState = State.Attack;
+            playerBeingAttacked = other.gameObject;
         }
     }
 
@@ -60,47 +95,36 @@ public class StateAI : MonoBehaviour
     {
         if (other.gameObject.CompareTag(playerTag))
         {
-            playerBeingAttacked = null;
             CurrentState = State.Chase;
+            playerBeingAttacked = null;
         }
-    }
-
-    void Update()
-    {
-        ProcessState();
     }
 
     void ProcessState()
     {
-        if (CurrentState == State.Idle)
+        switch (CurrentState)
         {
-            CheckIfWillPatrol();
-        }
-        else if (CurrentState == State.Patrol)
-        {
-            MoveToNextPatrolPoint();
-        }
-        else if (CurrentState == State.Chase)
-        {
-            ChasePlayer();
-        }
-        else if (CurrentState == State.Attack)
-        {
-            AttackPlayer();
+            case State.Idle:
+                CheckIfWillPatrol();
+                break;
+            case State.Patrol:
+                MoveToNextPatrolPoint();
+                break;
+            case State.Chase:
+                ChasePlayer();
+                break;
+            case State.Attack:
+                AttackPlayer();
+                break;
         }
     }
 
-    // Check if will patrol after some time
     void CheckIfWillPatrol()
     {
-        if (checkPatrolCoroutine != null)
-        {
-            return;
-        }
-        checkPatrolCoroutine = StartCoroutine(nameof(CheckPatrolRoutine));
+        checkPatrolCoroutine ??= StartCoroutine(CheckPatrolRoutine());
     }
 
-    // Coroutine to check every second if will patrol the chance to siwtch to patrol is 50/50
+    // Coroutine to check if the enemy will patrol chance is 50/50
     IEnumerator CheckPatrolRoutine()
     {
         yield return new WaitForSeconds(timeToCheckPatrol);
@@ -113,13 +137,13 @@ public class StateAI : MonoBehaviour
 
     void MoveToNextPatrolPoint()
     {
-        // Check if reached patrol point move to the next one
-        if (Vector3.Distance(transform.parent.position, patrolPoints[nextPatrolPointIndex].transform.position) < minDistanceToPatrolPoint)
+        // If the enemy is close enough to the next patrol point, move to the next one
+        if (Vector3.Distance(transform.parent.position, patrolPoints[nextPatrolPointIndex]) < minDistanceToPatrolPoint)
         {
             nextPatrolPointIndex = (nextPatrolPointIndex + 1) % patrolPoints.Length;
         }
 
-        transform.parent.position = Vector3.MoveTowards(transform.parent.position, patrolPoints[nextPatrolPointIndex].transform.position, patrollingSpeed * Time.deltaTime);
+        transform.parent.position = Vector3.MoveTowards(transform.parent.position, patrolPoints[nextPatrolPointIndex], patrollingSpeed * Time.deltaTime);
     }
 
     void ChasePlayer()
@@ -136,4 +160,14 @@ public class StateAI : MonoBehaviour
         Debug.Log("Attacking player");
     }
 
+    // Generate a random patrol route for the enemy
+    void GenerateRandomPatrolRoute()
+    {
+        int patrolPointsCount = Random.Range(minPatrolPoints, maxPatrolPoints);
+        patrolPoints = new Vector3[patrolPointsCount];
+        for (int i = 0; i < patrolPointsCount; i++)
+        {
+            patrolPoints[i] = new Vector3(transform.parent.position.x + Random.Range(minPatrolPointDistance, maxPatrolPointDistance), transform.parent.position.y, Random.Range(minPatrolPointDistance, maxPatrolPointDistance));
+        }
+    }
 }

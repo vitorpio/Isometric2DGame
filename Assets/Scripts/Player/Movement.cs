@@ -3,25 +3,21 @@ using UnityEngine.InputSystem;
 
 public class Movement : MonoBehaviour
 {
-    [SerializeField] InputAction move;
-    [SerializeField] float movementSpeed = 5f;
-    [SerializeField] float maxSpeed = 8f;
-
     Animator animator;
     Rigidbody rb;
 
-    private readonly string moveUpOrDownAnimation = "IsMovingUpOrDown";
-    private readonly string moveLeftOrRightAnimation = "IsMovingLeftOrRight";
+    [SerializeField] InputAction move;
+
+    // Movement params
+    readonly float movementSpeed = 5f;
+    readonly float maxSpeed = 8f;
+    readonly string moveUpOrDownAnimation = "IsMovingUpOrDown";
+    readonly string moveLeftOrRightAnimation = "IsMovingLeftOrRight";
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-    }
-
-    void Update()
-    {
-        ProcessMovement();
     }
 
     void OnEnable()
@@ -32,6 +28,11 @@ public class Movement : MonoBehaviour
     void OnDisable()
     {
         move.Disable();
+    }
+
+    void Update()
+    {
+        ProcessMovement();
     }
 
     void ProcessMovement()
@@ -46,34 +47,37 @@ public class Movement : MonoBehaviour
 
         if (movement != Vector2.zero)
         {
-            if (rb.linearVelocity.magnitude < maxSpeed)
-            {
-                Vector3 force = new Vector3(movement.x, 0, movement.y) * movementSpeed;
-                rb.AddForce(force, ForceMode.Acceleration);
-            }
+            ApplyMovement(movement);
         }
         else
         {
             rb.linearVelocity = Vector3.zero;
         }
+
         ProcessMovementAnimation(movement);
+    }
+
+    void ApplyMovement(Vector2 movement)
+    {
+        if (rb.linearVelocity.magnitude < maxSpeed)
+        {
+            Vector3 force = new Vector3(movement.x, 0, movement.y) * movementSpeed;
+            rb.AddForce(force, ForceMode.Acceleration);
+        }
     }
 
     void ProcessMovementAnimation(Vector2 movement)
     {
-        if (movement.y != 0)
-        {
-            animator.SetBool(moveUpOrDownAnimation, true);
-        }
-        else if (movement.x != 0)
-        {
-            animator.SetBool(moveLeftOrRightAnimation, true);
-        }
-        else
+        bool isMovingUpOrDown = movement.y != 0;
+        bool isMovingLeftOrRight = movement.x != 0;
+
+        animator.SetBool(moveUpOrDownAnimation, isMovingUpOrDown);
+        animator.SetBool(moveLeftOrRightAnimation, isMovingLeftOrRight);
+
+        if (!isMovingUpOrDown && !isMovingLeftOrRight)
         {
             animator.SetBool(moveUpOrDownAnimation, false);
             animator.SetBool(moveLeftOrRightAnimation, false);
         }
     }
-
 }

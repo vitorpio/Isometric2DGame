@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 7001022874760657083}
   - component: {fileID: 5730434846949662509}
   - component: {fileID: 8102386486001868993}
-  - component: {fileID: 5777522466714206733}
   - component: {fileID: 6733126112161163969}
+  - component: {fileID: 5777522466714206733}
   m_Layer: 0
-  m_Name: FieldOfAction
+  m_Name: AI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79,22 +79,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5777522466714206733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3970575000923537371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6957cd14a9cdd937fb47a63d4ebc2444, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CurrentState: 0
-  patrolPoints:
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!54 &6733126112161163969
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -122,6 +106,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 110
   m_CollisionDetection: 0
+--- !u!114 &5777522466714206733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3970575000923537371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6957cd14a9cdd937fb47a63d4ebc2444, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patrolPoints: []
 --- !u!1 &7133805033601586399
 GameObject:
   m_ObjectHideFlags: 0
@@ -133,6 +130,7 @@ GameObject:
   - component: {fileID: 3603429618388347924}
   - component: {fileID: 587187062116038642}
   - component: {fileID: 2539142673757411504}
+  - component: {fileID: 2719812191310174972}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -187,7 +185,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6c637b5d4f30a6f47bc648ebdab3a02b, type: 2}
+  - {fileID: 2100000, guid: d720b864c55a5a3059ad56cca0792686, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -209,3 +207,25 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!95 &2719812191310174972
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7133805033601586399}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 36fe7bcd9db10f980833160069b3762d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
