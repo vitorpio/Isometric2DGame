@@ -124,6 +124,7 @@ public class StateAI : MonoBehaviour
         checkPatrolCoroutine ??= StartCoroutine(CheckPatrolRoutine());
     }
 
+    // Coroutine to check if the enemy will patrol chance is 50/50
     IEnumerator CheckPatrolRoutine()
     {
         yield return new WaitForSeconds(timeToCheckPatrol);
@@ -136,6 +137,7 @@ public class StateAI : MonoBehaviour
 
     void MoveToNextPatrolPoint()
     {
+        // If the enemy is close enough to the next patrol point, move to the next one
         if (Vector3.Distance(transform.parent.position, patrolPoints[nextPatrolPointIndex]) < minDistanceToPatrolPoint)
         {
             nextPatrolPointIndex = (nextPatrolPointIndex + 1) % patrolPoints.Length;
@@ -158,6 +160,7 @@ public class StateAI : MonoBehaviour
         Debug.Log("Attacking player");
     }
 
+    // Generate a random patrol route for the enemy
     void GenerateRandomPatrolRoute()
     {
         int patrolPointsCount = Random.Range(minPatrolPoints, maxPatrolPoints);
