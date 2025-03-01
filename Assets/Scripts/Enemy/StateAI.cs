@@ -37,11 +37,13 @@ public class StateAI : MonoBehaviour
     readonly float maxPatrolPointDistance = 10f;
 
     // Chase params
-    Vector3? chasedPlayerPosition;
     readonly float chassingSpeed = 3.5f;
+    GameObject playerBeingChased;
 
     // Attack params
     GameObject playerBeingAttacked;
+    readonly float attackForce = 2f;
+    readonly int damage = 1;
 
     // Other Variables
     readonly string playerTag = "Player";
@@ -62,6 +64,7 @@ public class StateAI : MonoBehaviour
         if (other.CompareTag(playerTag))
         {
             CurrentState = State.Chase;
+            playerBeingChased = other.gameObject;
         }
     }
 
@@ -70,7 +73,7 @@ public class StateAI : MonoBehaviour
         if (other.CompareTag(playerTag))
         {
             CurrentState = State.Idle;
-            chasedPlayerPosition = null;
+            playerBeingChased = null;
         }
     }
 
@@ -78,7 +81,7 @@ public class StateAI : MonoBehaviour
     {
         if (other.CompareTag(playerTag))
         {
-            chasedPlayerPosition = other.transform.position;
+            playerBeingChased = other.gameObject;
         }
     }
 
@@ -148,16 +151,25 @@ public class StateAI : MonoBehaviour
 
     void ChasePlayer()
     {
-        if (chasedPlayerPosition.HasValue)
+        if (playerBeingChased != null && !playerBeingChased.GetComponent<Status>().isTakingDamage)
         {
-            Vector3 targetPositionXZ = new(chasedPlayerPosition.Value.x, transform.parent.position.y, chasedPlayerPosition.Value.z);
+            Vector3 chasedPlayerPosition = playerBeingChased.transform.position;
+            Vector3 targetPositionXZ = new(chasedPlayerPosition.x, transform.parent.position.y, chasedPlayerPosition.z);
             transform.parent.position = Vector3.MoveTowards(transform.parent.position, targetPositionXZ, chassingSpeed * Time.deltaTime);
         }
     }
 
     void AttackPlayer()
     {
-        Debug.Log("Attacking player");
+        Attack attack = playerBeingAttacked.GetComponent<Attack>();
+        if (!attack.isAttacking && !playerBeingAttacked.GetComponent<Status>().isTakingDamage)
+        {
+            Status playerStatus = playerBeingAttacked.GetComponent<Status>();
+            if (!playerStatus.isTakingDamage)
+            {
+                playerStatus.TakeDamage(transform.parent.position, damage, attackForce);
+            }
+        }
     }
 
     // Generate a random patrol route for the enemy

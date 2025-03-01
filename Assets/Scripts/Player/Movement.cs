@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 public class Movement : MonoBehaviour
 {
+    Status status;
     Animator animator;
     Rigidbody rb;
 
@@ -16,6 +17,7 @@ public class Movement : MonoBehaviour
 
     void Awake()
     {
+        status = GetComponent<Status>();
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
     }
@@ -37,6 +39,11 @@ public class Movement : MonoBehaviour
 
     void ProcessMovement()
     {
+        if (status.isTakingDamage)
+        {
+            return;
+        }
+
         Vector2 movement = move.ReadValue<Vector2>();
 
         // Disable diagonal movement
@@ -79,5 +86,12 @@ public class Movement : MonoBehaviour
             animator.SetBool(moveUpOrDownAnimation, false);
             animator.SetBool(moveLeftOrRightAnimation, false);
         }
+    }
+
+    public void StopMovement()
+    {
+        rb.linearVelocity = Vector3.zero;
+        animator.SetBool(moveUpOrDownAnimation, false);
+        animator.SetBool(moveLeftOrRightAnimation, false);
     }
 }
