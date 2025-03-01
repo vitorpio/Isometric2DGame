@@ -6,9 +6,9 @@ public class EnemyStatus : MonoBehaviour
     Animator animator;
 
     int health = 3;
-    public bool isTakingDamage = false;
     readonly float timeBetweenDamage = 0.5f;
     readonly float deathAnimationTime = 0.3f;
+    public bool isTakingDamage = false;
 
     void Awake()
     {
