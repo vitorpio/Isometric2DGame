@@ -38,7 +38,12 @@ public class StateAI : MonoBehaviour
     readonly float maxPatrolPointDistance = 10f;
 
     // Chase params
-    readonly float chassingSpeed = 3.5f;
+    float currentChasingSpeed;
+    readonly float normalChasingSpeed = 3.5f;
+    readonly float boostChasingSpeed = 5f;
+    readonly float timeToCheckBoost = 1f;
+    readonly float boostTime = 2f;
+    Coroutine checkMovementBoostCoroutine;
     GameObject playerBeingChased;
 
     // Attack params
@@ -54,6 +59,8 @@ public class StateAI : MonoBehaviour
         animator = GetComponent<Animator>();
         enemyStatus = GetComponent<EnemyStatus>();
         GenerateRandomPatrolRoute();
+
+        currentChasingSpeed = normalChasingSpeed;
     }
 
     void Update()
@@ -69,6 +76,7 @@ public class StateAI : MonoBehaviour
         if (other.CompareTag(playerTag))
         {
             CurrentState = State.Chase;
+            currentChasingSpeed = normalChasingSpeed;
             playerBeingChased = other.gameObject;
         }
     }
@@ -118,6 +126,7 @@ public class StateAI : MonoBehaviour
                 MoveToNextPatrolPoint();
                 break;
             case State.Chase:
+                CheckIfWillBoostMovement();
                 ChasePlayer();
                 break;
             case State.Attack:
@@ -154,13 +163,37 @@ public class StateAI : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, patrolPoints[nextPatrolPointIndex], patrollingSpeed * Time.deltaTime);
     }
 
+    void CheckIfWillBoostMovement()
+    {
+        if (checkMovementBoostCoroutine == null && currentChasingSpeed == normalChasingSpeed)
+        {
+            checkMovementBoostCoroutine = StartCoroutine(CheckBoostMovementRoutine());
+        }
+    }
+
+    IEnumerator CheckBoostMovementRoutine()
+    {
+        yield return new WaitForSeconds(timeToCheckBoost);
+        if (Random.value > 0.75f && CurrentState == State.Chase)
+        {
+            currentChasingSpeed = boostChasingSpeed;
+            Invoke(nameof(StopChasingBoost), boostTime);
+        }
+        checkMovementBoostCoroutine = null;
+    }
+
+    void StopChasingBoost()
+    {
+        currentChasingSpeed = normalChasingSpeed;
+    }
+
     void ChasePlayer()
     {
         if (playerBeingChased != null && !playerBeingChased.GetComponent<Status>().isTakingDamage)
         {
             Vector3 chasedPlayerPosition = playerBeingChased.transform.position;
             Vector3 targetPositionXZ = new(chasedPlayerPosition.x, transform.position.y, chasedPlayerPosition.z);
-            transform.position = Vector3.MoveTowards(transform.position, targetPositionXZ, chassingSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, targetPositionXZ, currentChasingSpeed * Time.deltaTime);
         }
     }
 
