@@ -10,6 +10,8 @@ public class Attack : MonoBehaviour
     public bool isAttacking = false;
     readonly float timeBetweenAttacks = 1f;
     readonly string attackAnimation = "Attack";
+    readonly int attackDamage = 1;
+    readonly float attackForce = 3f;
 
     void Awake()
     {
@@ -29,6 +31,16 @@ public class Attack : MonoBehaviour
     void Update()
     {
         ProcessAttack();
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("Enemy") && isAttacking)
+        {
+            EnemyStatus enemyStatus = other.gameObject.GetComponentInParent<EnemyStatus>();
+            if (!enemyStatus.isTakingDamage)
+                enemyStatus.TakeDamage(transform.position, attackDamage, attackForce);
+        }
     }
 
     void ProcessAttack()

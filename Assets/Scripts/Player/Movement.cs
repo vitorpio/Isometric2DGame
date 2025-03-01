@@ -83,8 +83,7 @@ public class Movement : MonoBehaviour
 
         if (!isMovingUpOrDown && !isMovingLeftOrRight)
         {
-            animator.SetBool(moveUpOrDownAnimation, false);
-            animator.SetBool(moveLeftOrRightAnimation, false);
+            StopMovement();
         }
     }
 

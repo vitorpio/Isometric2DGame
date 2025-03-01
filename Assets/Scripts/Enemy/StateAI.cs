@@ -4,6 +4,7 @@ using UnityEngine;
 public class StateAI : MonoBehaviour
 {
     Animator animator;
+    EnemyStatus enemyStatus;
 
     private State _currentState;
     private State CurrentState
@@ -13,13 +14,13 @@ public class StateAI : MonoBehaviour
         {
             if (_currentState != value)
             {
+                if (value == State.Attack && playerBeingAttacked != null && playerBeingAttacked.GetComponent<Attack>().isAttacking)
+                {
+                    return;
+                }
                 _currentState = value;
                 animator.SetTrigger(value.ToString());
-                if (checkPatrolCoroutine != null)
-                {
-                    StopCoroutine(checkPatrolCoroutine);
-                    checkPatrolCoroutine = null;
-                }
+                StopCheckPatrolCoroutine();
             }
         }
     }
@@ -50,13 +51,17 @@ public class StateAI : MonoBehaviour
 
     void Awake()
     {
-        animator = GetComponentInParent<Animator>();
+        animator = GetComponent<Animator>();
+        enemyStatus = GetComponent<EnemyStatus>();
         GenerateRandomPatrolRoute();
     }
 
     void Update()
     {
-        ProcessState();
+        if (!enemyStatus.isTakingDamage)
+        {
+            ProcessState();
+        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -99,7 +104,6 @@ public class StateAI : MonoBehaviour
         if (other.gameObject.CompareTag(playerTag))
         {
             CurrentState = State.Chase;
-            playerBeingAttacked = null;
         }
     }
 
@@ -124,10 +128,12 @@ public class StateAI : MonoBehaviour
 
     void CheckIfWillPatrol()
     {
-        checkPatrolCoroutine ??= StartCoroutine(CheckPatrolRoutine());
+        if (checkPatrolCoroutine == null)
+        {
+            checkPatrolCoroutine = StartCoroutine(CheckPatrolRoutine());
+        }
     }
 
-    // Coroutine to check if the enemy will patrol chance is 50/50
     IEnumerator CheckPatrolRoutine()
     {
         yield return new WaitForSeconds(timeToCheckPatrol);
@@ -140,13 +146,12 @@ public class StateAI : MonoBehaviour
 
     void MoveToNextPatrolPoint()
     {
-        // If the enemy is close enough to the next patrol point, move to the next one
-        if (Vector3.Distance(transform.parent.position, patrolPoints[nextPatrolPointIndex]) < minDistanceToPatrolPoint)
+        if (Vector3.Distance(transform.position, patrolPoints[nextPatrolPointIndex]) < minDistanceToPatrolPoint)
         {
             nextPatrolPointIndex = (nextPatrolPointIndex + 1) % patrolPoints.Length;
         }
 
-        transform.parent.position = Vector3.MoveTowards(transform.parent.position, patrolPoints[nextPatrolPointIndex], patrollingSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, patrolPoints[nextPatrolPointIndex], patrollingSpeed * Time.deltaTime);
     }
 
     void ChasePlayer()
@@ -154,32 +159,40 @@ public class StateAI : MonoBehaviour
         if (playerBeingChased != null && !playerBeingChased.GetComponent<Status>().isTakingDamage)
         {
             Vector3 chasedPlayerPosition = playerBeingChased.transform.position;
-            Vector3 targetPositionXZ = new(chasedPlayerPosition.x, transform.parent.position.y, chasedPlayerPosition.z);
-            transform.parent.position = Vector3.MoveTowards(transform.parent.position, targetPositionXZ, chassingSpeed * Time.deltaTime);
+            Vector3 targetPositionXZ = new(chasedPlayerPosition.x, transform.position.y, chasedPlayerPosition.z);
+            transform.position = Vector3.MoveTowards(transform.position, targetPositionXZ, chassingSpeed * Time.deltaTime);
         }
     }
 
     void AttackPlayer()
     {
         Attack attack = playerBeingAttacked.GetComponent<Attack>();
-        if (!attack.isAttacking && !playerBeingAttacked.GetComponent<Status>().isTakingDamage)
+        if (!attack.isAttacking)
         {
             Status playerStatus = playerBeingAttacked.GetComponent<Status>();
             if (!playerStatus.isTakingDamage)
             {
-                playerStatus.TakeDamage(transform.parent.position, damage, attackForce);
+                playerStatus.TakeDamage(transform.position, damage, attackForce);
             }
         }
     }
 
-    // Generate a random patrol route for the enemy
     void GenerateRandomPatrolRoute()
     {
         int patrolPointsCount = Random.Range(minPatrolPoints, maxPatrolPoints);
         patrolPoints = new Vector3[patrolPointsCount];
         for (int i = 0; i < patrolPointsCount; i++)
         {
-            patrolPoints[i] = new Vector3(transform.parent.position.x + Random.Range(minPatrolPointDistance, maxPatrolPointDistance), transform.parent.position.y, Random.Range(minPatrolPointDistance, maxPatrolPointDistance));
+            patrolPoints[i] = new Vector3(transform.position.x + Random.Range(minPatrolPointDistance, maxPatrolPointDistance), transform.position.y, Random.Range(minPatrolPointDistance, maxPatrolPointDistance));
+        }
+    }
+
+    void StopCheckPatrolCoroutine()
+    {
+        if (checkPatrolCoroutine != null)
+        {
+            StopCoroutine(checkPatrolCoroutine);
+            checkPatrolCoroutine = null;
         }
     }
 }
