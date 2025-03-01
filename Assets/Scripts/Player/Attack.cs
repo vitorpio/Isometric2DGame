@@ -7,11 +7,11 @@ public class Attack : MonoBehaviour
 
     [SerializeField] InputAction attack;
 
-    public bool isAttacking = false;
     readonly float timeBetweenAttacks = 1f;
     readonly string attackAnimation = "Attack";
     readonly int attackDamage = 1;
     readonly float attackForce = 3f;
+    public bool isAttacking = false;
 
     void Awake()
     {

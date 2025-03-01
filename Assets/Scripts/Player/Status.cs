@@ -6,8 +6,8 @@ public class Status : MonoBehaviour
     Movement movement;
 
     int health = 10;
-    public bool isTakingDamage = false;
     readonly float timeBetweenDamage = 0.5f;
+    public bool isTakingDamage = false;
 
     void Awake()
     {
